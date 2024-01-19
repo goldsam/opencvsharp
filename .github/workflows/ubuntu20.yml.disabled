@@ -16,12 +16,12 @@ jobs:
   build:
 
     runs-on: ubuntu-20.04
-    
+
     steps:
       - uses: actions/checkout@v3
         with:
           path: opencvsharp
-          
+
       - name: Install dependencies
         run: |
           sudo apt-get update -y 
@@ -48,7 +48,7 @@ jobs:
             libopencore-amrwb-dev \
             libavresample-dev \
             x264 \
-            libtesseract-dev 
+            libtesseract-dev
 
       - name: Cache OpenCV
         id: opencv-cache
@@ -120,7 +120,7 @@ jobs:
           sudo ldconfig
           cd ${GITHUB_WORKSPACE}
           ls
-      
+
       - name: Build OpenCvSharpExtern
         run: |
           mkdir opencvsharp/src/build && cd $_
@@ -144,7 +144,7 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Create NuGet package
-        env: 
+        env:
           BETA: ""
         run: |
           yyyymmdd=`date '+%Y%m%d'`
@@ -161,12 +161,12 @@ jobs:
         with:
           name: artifacts_ubuntu_20
           path: artifacts_ubuntu
-        
+
       - name: Test
         run: |
           cd ${GITHUB_WORKSPACE}/opencvsharp/test/OpenCvSharp.Tests
-          dotnet build -c Release -f net6.0
-          cp ${GITHUB_WORKSPACE}/opencvsharp/nuget/libOpenCvSharpExtern.so ${GITHUB_WORKSPACE}/opencvsharp/test/OpenCvSharp.Tests/bin/Release/net6.0/
+          dotnet build -c Release -f net8.0
+          cp ${GITHUB_WORKSPACE}/opencvsharp/nuget/libOpenCvSharpExtern.so ${GITHUB_WORKSPACE}/opencvsharp/test/OpenCvSharp.Tests/bin/Release/net8.0/
           cp ${GITHUB_WORKSPACE}/opencvsharp/nuget/libOpenCvSharpExtern.so ${GITHUB_WORKSPACE}/opencvsharp/test/OpenCvSharp.Tests/
           sudo cp ${GITHUB_WORKSPACE}/opencvsharp/nuget/libOpenCvSharpExtern.so /usr/lib/
-          LD_LIBRARY_PATH=. dotnet test OpenCvSharp.Tests.csproj -c Release -f net6.0 --runtime ubuntu.20.04-x64 --logger "trx;LogFileName=test-results.trx" < /dev/null
+          LD_LIBRARY_PATH=. dotnet test OpenCvSharp.Tests.csproj -c Release -f net8.0 --runtime ubuntu.20.04-x64 --logger "trx;LogFileName=test-results.trx" < /dev/null

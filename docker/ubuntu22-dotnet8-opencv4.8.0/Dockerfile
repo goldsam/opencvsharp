@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-jammy as builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV OPENCV_VERSION=4.7.0
+ENV OPENCV_VERSION=4.8.0
 
 WORKDIR /
 
@@ -129,14 +129,14 @@ COPY --from=builder /usr/lib /usr/lib
 # Install Build the C# part of OpenCvSharp
 RUN git clone https://github.com/shimat/opencvsharp.git && cd opencvsharp
 RUN cd /opencvsharp/src/OpenCvSharp && \
-    dotnet build -c Release -f net6.0 && \
+    dotnet build -c Release -f net8.0 && \
     cd /opencvsharp/src/OpenCvSharp.Extensions && \
-    dotnet build -c Release -f net6.0
+    dotnet build -c Release -f net8.0
 
-RUN dotnet test /opencvsharp/test/OpenCvSharp.Tests/OpenCvSharp.Tests.csproj -c Release -f net6.0 --runtime ubuntu.20.04-x64 --logger "trx;LogFileName=test-results.trx" < /dev/null
+RUN dotnet test /opencvsharp/test/OpenCvSharp.Tests/OpenCvSharp.Tests.csproj -c Release -f net8.0 --runtime ubuntu.20.04-x64 --logger "trx;LogFileName=test-results.trx" < /dev/null
 
 # Simple console app test using NuGet
-# RUN dotnet new console -f net6.0 -o "ConsoleApp01" && cd /ConsoleApp01 && \
+# RUN dotnet new console -f net8.0 -o "ConsoleApp01" && cd /ConsoleApp01 && \
 #    echo "\n\
 #using System; \n\
 #using OpenCvSharp; \n\
