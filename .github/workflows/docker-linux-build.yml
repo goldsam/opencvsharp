@@ -1,0 +1,33 @@
+name: Build Linux Docker Images
+
+on:
+  pull_request:
+    types: [synchronize, opened]
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: 
+          - ubuntu22
+        base_name: 
+          - dotnet8
+          - dotnet8sdk
+        opencv_version: 
+          - '4.9.0'
+
+    env:
+      IMAGE_NAME: ${{ matrix.os }}-${{ matrix.base_name }}-opencv${{ matrix.opencv_version }}
+      IMAGE_TAG: ${{ github.event.inputs.docker_image_tag }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: docker build
+        run: |
+          docker build -f "docker/${IMAGE_NAME}/Dockerfile -t "${GITHUB_REPOSITORY_OWNER}/${IMAGE_NAME}" .
