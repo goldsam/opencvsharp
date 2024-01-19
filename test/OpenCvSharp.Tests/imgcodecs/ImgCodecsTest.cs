@@ -50,12 +50,11 @@ public class ImgCodecsTest : TestBase
     [Fact]
     public void ImReadFailure()
     {
-        Assert.ThrowsAny<OpenCvSharpException>(() => 
-        {
-            using var image = Cv2.ImRead("not_exist.png", ImreadModes.Grayscale);
-        });
+        using var image = Cv2.ImRead("not_exist.png", ImreadModes.Grayscale);
+        Assert.NotNull(image);
+        Assert.True(image.Empty());
     }
-
+        
     [Fact]
     public void ImReadDoesNotSupportGif()
     {
