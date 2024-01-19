@@ -1,7 +1,7 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-jammy as builder
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal as builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV OPENCV_VERSION=4.7.0
+ENV OPENCV_VERSION=4.6.0
 
 WORKDIR /
 
@@ -21,7 +21,7 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
       libavcodec-dev \
       libavformat-dev \
       libswscale-dev \
-      libdc1394-dev \
+      libdc1394-22-dev \
       libxine2-dev \
       libv4l-dev \
       libtheora-dev \
@@ -29,6 +29,7 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
       libxvidcore-dev \
       libopencore-amrnb-dev \
       libopencore-amrwb-dev \
+      libavresample-dev \
       x264 \
       libtesseract-dev \
       libgdiplus \
@@ -36,12 +37,12 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup opencv and opencv-contrib source
-RUN wget -q https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
-    unzip -q ${OPENCV_VERSION}.zip && \
+RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+    unzip ${OPENCV_VERSION}.zip && \
     rm ${OPENCV_VERSION}.zip && \
     mv opencv-${OPENCV_VERSION} opencv && \
-    wget -q https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
-    unzip -q ${OPENCV_VERSION}.zip && \
+    wget https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
+    unzip ${OPENCV_VERSION}.zip && \
     rm ${OPENCV_VERSION}.zip && \
     mv opencv_contrib-${OPENCV_VERSION} opencv_contrib
 
@@ -101,7 +102,7 @@ RUN mkdir /opencvsharp/make && cd /opencvsharp/make && \
 
 ########## Test native .so file ##########
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-jammy
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal
 RUN apt-get update && apt-get -y install --no-install-recommends gcc
 # /usr/lib/libOpenCvSharpExtern.so
 # /usr/local/lib/libopencv_*.a
@@ -122,32 +123,32 @@ int main(){ \n\
 
 ########## Test .NET class libraries ##########
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-jammy
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal
 COPY --from=builder /usr/lib /usr/lib
 # Install Build the C# part of OpenCvSharp
 RUN git clone https://github.com/shimat/opencvsharp.git && cd opencvsharp
 RUN cd /opencvsharp/src/OpenCvSharp && \
-    dotnet build -c Release -f net6.0 && \
+    dotnet build -c Release -f net8.0 && \
     cd /opencvsharp/src/OpenCvSharp.Extensions && \
-    dotnet build -c Release -f net6.0
+    dotnet build -c Release -f net8.0
 
-RUN dotnet test /opencvsharp/test/OpenCvSharp.Tests/OpenCvSharp.Tests.csproj -c Release -f net6.0 --runtime ubuntu.20.04-x64 --logger "trx;LogFileName=test-results.trx" < /dev/null
+RUN dotnet test /opencvsharp/test/OpenCvSharp.Tests/OpenCvSharp.Tests.csproj -c Release -f net8.0 --runtime ubuntu.20.04-x64 --logger "trx;LogFileName=test-results.trx" < /dev/null
 
 # Simple console app test using NuGet
-# RUN dotnet new console -f net6.0 -o "ConsoleApp01" && cd /ConsoleApp01 && \
-#     echo "\n\
-# using System; \n\
-# using OpenCvSharp; \n\
-# class Program{ \n\
-#   static void Main(){ \n\
-#     Console.WriteLine(Cv2.GetTickCount()); \n\
-#     using var mat = new Mat(1, 1, MatType.CV_8UC1); \n\
-#     Console.WriteLine(mat.CvPtr); \n\
-#   } \n\
-# }" > Program.cs && \
-#     dotnet add package OpenCvSharp4 && \
-#     dotnet run && \
-#     rm -rf /ConsoleApp01
+# RUN dotnet new console -f net8.0 -o "ConsoleApp01" && cd /ConsoleApp01 && \
+#    echo "\n\
+#using System; \n\
+#using OpenCvSharp; \n\
+#class Program{ \n\
+#  static void Main(){ \n\
+#    Console.WriteLine(Cv2.GetTickCount()); \n\
+#    using var mat = new Mat(1, 1, MatType.CV_8UC1); \n\
+#    Console.WriteLine(mat.CvPtr); \n\
+#  } \n\
+#}" > Program.cs && \
+#    dotnet add package OpenCvSharp4 && \
+#    dotnet run && \
+#    rm -rf /ConsoleApp01
 
 #RUN ldd /artifacts/libOpenCvSharpExtern.so
 
@@ -155,5 +156,5 @@ RUN dotnet test /opencvsharp/test/OpenCvSharp.Tests/OpenCvSharp.Tests.csproj -c 
 
 ########## Final image ##########
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0-jammy as final
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal as final
 COPY --from=builder /usr/lib /usr/lib
