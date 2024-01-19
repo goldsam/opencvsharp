@@ -16,12 +16,12 @@ jobs:
   build:
 
     runs-on: ubuntu-22.04
-    
+
     steps:
       - uses: actions/checkout@v3
         with:
           path: opencvsharp
-          
+
       - name: Install dependencies
         run: |
           sudo apt-get update -y 
@@ -48,7 +48,8 @@ jobs:
             libopencore-amrwb-dev \
             libswresample-dev \
             x264 \
-            libtesseract-dev
+            libtesseract-dev \
+            libgdiplus
 
       - name: Cache OpenCV
         id: opencv-cache
