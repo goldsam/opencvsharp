@@ -46,9 +46,9 @@ jobs:
             libxvidcore-dev \
             libopencore-amrnb-dev \
             libopencore-amrwb-dev \
-            libavresample-dev \
+            libswresample-dev \
             x264 \
-            libtesseract-dev 
+            libtesseract-dev
 
       - name: Cache OpenCV
         id: opencv-cache
