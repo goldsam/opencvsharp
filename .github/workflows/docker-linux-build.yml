@@ -11,12 +11,12 @@ jobs:
   build:
     strategy:
       matrix:
-        os: 
+        os:
           - ubuntu22
-        base_name: 
+        base_name:
           - dotnet8
           - dotnet8sdk
-        opencv_version: 
+        opencv_version:
           - '4.9.0'
 
     env:
@@ -30,4 +30,4 @@ jobs:
 
       - name: docker build
         run: |
-          docker build -f "docker/${IMAGE_NAME}/Dockerfile -t "${GITHUB_REPOSITORY_OWNER}/${IMAGE_NAME}" .
+          docker build -f "docker/${IMAGE_NAME}/Dockerfile" -t "${GITHUB_REPOSITORY_OWNER}/${IMAGE_NAME}" .
